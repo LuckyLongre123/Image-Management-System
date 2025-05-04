@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Upload Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 flex items-center justify-center min-h-screen px-4">
+    <div class="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-md">
+      <h1 class="text-2xl font-bold text-center mb-6">Image Upload</h1>
+
+      <% if (fetchedImageUrl) { %>
+      <div class="mb-6">
+        <a
+          href="/"
+          class="text-blue-500 hover:text-blue-700 underline font-medium"
+          >Go to Home</a
+        >
+        <h2 class="text-lg font-semibold text-gray-700 mb-2 mt-4">
+          Fetched Image:
+        </h2>
+        <img
+          src="<%= fetchedImageUrl %>"
+          alt="Fetched Image"
+          class="w-full h-48 object-cover rounded-lg border"
+        />
+      </div>
+      <% } else { %>
+      <div class="space-y-6" id="uploadForm">
+        <div
+          class="w-full flex flex-col sm:flex-row gap-4 justify-between mb-4"
+        >
+          <a
+            href="/findImage"
+            class="text-blue-500 hover:text-blue-700 underline font-medium"
+            >Find Image by Name</a
+          >
+          <a
+            href="/all/images"
+            class="text-blue-500 hover:text-blue-700 underline font-medium"
+            >See All Images</a
+          >
+        </div>
+
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700 mb-2"
+            >Name</label
+          >
+          <input
+            type="text"
+            name="name"
+            id="name"
+            required
+            class="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter your name"
+            aria-label="Enter your name"
+          />
+          <p id="nameError" class="text-sm text-red-500 mt-2 hidden">
+            Name is required.
+          </p>
+        </div>
+
+        <div>
+          <label
+            for="fileInput"
+            class="block text-sm font-medium text-gray-700 mb-2"
+            >Choose an image</label
+          >
+          <input
+            type="file"
+            id="fileInput"
+            accept="image/*"
+            name="imageUrl"
+            required
+            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border file:border-gray-300 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100 focus:ring-blue-500 focus:border-blue-500"
+            onchange="previewImage(event)"
+            aria-label="Choose an image to upload"
+          />
+          <p id="fileError" class="text-sm text-red-500 mt-2 hidden">
+            Please select a valid image file.
+          </p>
+        </div>
+
+        <div id="imagePreview" class="hidden">
+          <p class="text-sm text-gray-500 mb-2">Preview:</p>
+          <img
+            id="preview"
+            class="w-full h-48 object-cover rounded-lg border"
+            alt="Image Preview"
+          />
+        </div>
+
+        <!-- Loader -->
+        <div id="loader" class="hidden flex justify-center">
+          <svg
+            class="animate-spin h-6 w-6 text-blue-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            ></path>
+          </svg>
+        </div>
+
+        <div class="flex space-x-4">
+          <button
+            type="button"
+            id="uploadBtn"
+            onclick="handleSubmit()"
+            class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+          >
+            Upload
+          </button>
+          <button
+            type="reset"
+            class="w-full bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+            onclick="resetPreview()"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+      <% } %>
+    </div>
+
+    <script>
+      let dataToSend = { name: "", imageUrl: "" };
+
+      function previewImage(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById("preview");
+        const imagePreview = document.getElementById("imagePreview");
+        const fileError = document.getElementById("fileError");
+
+        if (file) {
+          if (!file.type.startsWith("image/")) {
+            fileError.classList.remove("hidden");
+            imagePreview.classList.add("hidden");
+            return;
+          }
+
+          fileError.classList.add("hidden");
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            preview.src = e.target.result;
+            dataToSend = {
+              name: document.getElementById("name").value,
+              imageUrl: e.target.result,
+            };
+            imagePreview.classList.remove("hidden");
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      function resetPreview() {
+        const preview = document.getElementById("preview");
+        const imagePreview = document.getElementById("imagePreview");
+        const fileInput = document.getElementById("fileInput");
+        const nameInput = document.getElementById("name");
+        const fileError = document.getElementById("fileError");
+        const nameError = document.getElementById("nameError");
+
+        nameInput.value = "";
+        dataToSend = {};
+        fileInput.value = "";
+        preview.src = "";
+        imagePreview.classList.add("hidden");
+        fileError.classList.add("hidden");
+        nameError.classList.add("hidden");
+      }
+
+      async function handleSubmit() {
+        const nameInput = document.getElementById("name");
+        const fileInput = document.getElementById("fileInput");
+        const nameError = document.getElementById("nameError");
+        const fileError = document.getElementById("fileError");
+        const loader = document.getElementById("loader");
+        const uploadBtn = document.getElementById("uploadBtn");
+
+        let isValid = true;
+
+        if (!nameInput.value.trim()) {
+          nameError.classList.remove("hidden");
+          isValid = false;
+        } else {
+          nameError.classList.add("hidden");
+        }
+
+        if (
+          !fileInput.files.length ||
+          !fileInput.files[0].type.startsWith("image/")
+        ) {
+          fileError.classList.remove("hidden");
+          isValid = false;
+        } else {
+          fileError.classList.add("hidden");
+        }
+
+        if (isValid) {
+          loader.classList.remove("hidden");
+          uploadBtn.disabled = true;
+          uploadBtn.textContent = "Uploading...";
+
+          try {
+            console.log("Data to send:", dataToSend);
+            const response = await fetch("/upload", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(dataToSend),
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+              console.log("Upload successful:", result);
+              window.location.href = `/prev/${result.user._id}`;
+            } else {
+              console.error("Upload failed:", result.statusText);
+              alert(result.message);
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert("Something went wrong!");
+          } finally {
+            loader.classList.add("hidden");
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = "Upload";
+            resetPreview();
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
