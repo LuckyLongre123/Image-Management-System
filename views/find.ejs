@@ -4,15 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Document</title>
+    <title>Find Image</title>
   </head>
-  <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+  <body class="bg-gray-100 flex items-center justify-center min-h-screen px-4">
+    <div class="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-md">
       <h1 class="text-2xl font-bold text-center mb-6">Find Image by Name</h1>
 
-      <!-- Permanent Image Section -->
-
-      <form method="post" action="/findImage" class="space-y-6" id="uploadForm">
+      <form
+        method="post"
+        action="/findImage"
+        class="space-y-6"
+        id="uploadForm"
+        onsubmit="return handleSubmit(event)"
+      >
         <!-- Name Input -->
         <div>
           <label for="name" class="block text-sm font-medium text-gray-700 mb-2"
@@ -32,15 +36,10 @@
           </p>
         </div>
 
-        <!-- File Input -->
-
-        <!-- Image Preview -->
-
         <!-- Buttons -->
-        <div class="flex space-x-4">
+        <div class="flex flex-col sm:flex-row gap-4">
           <button
             type="submit"
-            onsubmit="handleSubmit()"
             class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
           >
             Search
@@ -48,26 +47,21 @@
           <button
             type="reset"
             class="w-full bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
-            onclick='
-    (() => {
-      document.getElementById("name").value = "";
-      document.getElementById("fetchedImage").src = "";
-      document.getElementById("nameError").classList.add("hidden");
-    })()
-  '
+            onclick="handleReset()"
           >
             Reset
           </button>
         </div>
 
-        <div class="mb-6">
+        <!-- Image Display -->
+        <div class="mt-6">
           <a
             class="text-blue-500 hover:text-blue-700 underline font-medium transition duration-200"
             href="/"
           >
             Go to Home
           </a>
-          <h2 class="text-lg font-semibold text-gray-700 mb-2">
+          <h2 class="text-lg font-semibold text-gray-700 mb-2 mt-4">
             Fetched Image:
           </h2>
           <img
@@ -79,34 +73,50 @@
         </div>
       </form>
     </div>
-  </body>
-  <script>
-    const validate = () => {
-      const name = document.getElementById("name").value;
-      if (name === "") {
-        document.getElementById("nameError").classList.remove("hidden");
-        return false;
-      } else {
+
+    <script>
+      const validate = () => {
+        const name = document.getElementById("name").value.trim();
+        if (name === "") {
+          document.getElementById("nameError").classList.remove("hidden");
+          return false;
+        } else {
+          document.getElementById("nameError").classList.add("hidden");
+          return true;
+        }
+      };
+
+      const handleReset = () => {
+        document.getElementById("name").value = "";
+        document.getElementById("fetchedImage").src = "";
         document.getElementById("nameError").classList.add("hidden");
-        return true;
-      }
-    };
-    const handleSubmit = async () => {
-      try {
-        if (validate()) {
-          const res = await fetch("/findImage", {
+      };
+
+      const handleSubmit = async (event) => {
+        event.preventDefault();
+        if (!validate()) return;
+
+        try {
+          const response = await fetch("/findImage", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              name: document.getElementById("name").value,
+              name: document.getElementById("name").value.trim(),
             }),
           });
+
+          const data = await response.json();
+          if (data?.imageUrl) {
+            document.getElementById("fetchedImage").src = data.imageUrl;
+          } else {
+            alert("Image not found or error occurred.");
+          }
+        } catch (error) {
+          console.error("Error:", error);
         }
-      } catch (error) {
-        console.error("Error:", error);
-      }
-    };
-  </script>
+      };
+    </script>
+  </body>
 </html>

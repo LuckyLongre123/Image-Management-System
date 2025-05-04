@@ -6,15 +6,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <title>All Uploaded Images</title>
   </head>
-  <body class="bg-gray-100 min-h-screen flex items-center justify-center">
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
-      <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">
+  <body class="bg-gray-100 min-h-screen flex items-center justify-center px-4">
+    <div class="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-6xl">
+      <h1 class="text-2xl sm:text-3xl font-bold text-center mb-6 text-gray-800">
         All Uploaded Images
       </h1>
-      <div class="mb-8 text-center">
+
+      <div class="mb-6 text-center">
         <a
           href="/"
-          class="text-blue-500 hover:text-blue-700 underline font-medium transition duration-200"
+          class="text-blue-600 hover:text-blue-800 underline font-medium transition duration-200"
         >
           Go to Home
         </a>
@@ -23,16 +24,20 @@
       <% if (users.length === 0) { %>
       <p class="text-center text-gray-500">No images found.</p>
       <% } else { %>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <% users.forEach(user => { %>
-        <div class="bg-gray-50 rounded-lg shadow-md overflow-hidden">
+        <div
+          class="bg-gray-50 rounded-lg shadow-md overflow-hidden transition transform hover:scale-105 duration-300"
+        >
           <img
             src="<%= user.imageUrl %>"
             alt="<%= user.name %>"
             class="w-full h-48 object-cover"
           />
           <div class="p-4">
-            <h2 class="text-lg font-semibold text-gray-700">
+            <h2
+              class="text-lg font-semibold text-gray-700 text-center truncate"
+            >
               <%= user.name %>
             </h2>
           </div>
